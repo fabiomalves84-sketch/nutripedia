@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf }}">
+  <meta name="description" content="Referências públicas sobre alimentação complementar dos 6 aos 23 meses.">
+  <title>NutriPedia · Alimentação complementar</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src="{{ url_for('static', filename='app.js') }}" defer></script>
+</head>
+<body>
+  <header><a class="brand" href="/"><span class="brand-mark" aria-hidden="true">N</span><span>NutriPedia</span></a><nav aria-label="Áreas"><a aria-current="page" href="/">Área médica</a><a href="/campaigns">Campanhas</a></nav></header>
+  <main>
+    <div class="heading"><div><p class="eyebrow">ALIMENTAÇÃO COMPLEMENTAR</p><h1>Dos 6 aos<br>23 meses.</h1><p class="intro">Encontra orientações públicas por tema e guarda as referências mais úteis.</p></div><button id="add" class="primary">+ Adicionar referência</button></div>
+    <section class="age-guide" aria-labelledby="age-guide-title">
+      <div class="age-guide-heading">
+        <div><p class="eyebrow">GUIA RÁPIDO</p><h2 id="age-guide-title">Escolhe a etapa</h2></div>
+        <div class="age-tabs" role="tablist" aria-label="Idade da criança">
+          <button role="tab" id="tab-6-8" aria-controls="panel-6-8" aria-selected="true" data-age="6-8">6–8 meses</button>
+          <button role="tab" id="tab-9-11" aria-controls="panel-9-11" aria-selected="false" tabindex="-1" data-age="9-11">9–11 meses</button>
+          <button role="tab" id="tab-12-23" aria-controls="panel-12-23" aria-selected="false" tabindex="-1" data-age="12-23">12–23 meses</button>
+        </div>
+      </div>
+      <div class="age-panel" id="panel-6-8" role="tabpanel" aria-labelledby="tab-6-8">
+        <div><span>Frequência</span><strong>2–3 refeições por dia</strong></div>
+        <div><span>Textura</span><strong>Puré, esmagados e semissólidos</strong></div>
+        <div><span>Foco da etapa</span><strong>Começar com pequenas quantidades e aumentar gradualmente</strong></div>
+      </div>
+      <div class="age-panel" id="panel-9-11" role="tabpanel" aria-labelledby="tab-9-11" hidden>
+        <div><span>Frequência</span><strong>3–4 refeições por dia</strong></div>
+        <div><span>Textura</span><strong>Mais variedade e alimentos para agarrar</strong></div>
+        <div><span>Foco da etapa</span><strong>Progredir a consistência segundo as capacidades da criança</strong></div>
+      </div>
+      <div class="age-panel" id="panel-12-23" role="tabpanel" aria-labelledby="tab-12-23" hidden>
+        <div><span>Frequência</span><strong>3–4 refeições e 1–2 merendas</strong></div>
+        <div><span>Textura</span><strong>Alimentos da família adaptados com segurança</strong></div>
+        <div><span>Foco da etapa</span><strong>Reforçar variedade, densidade nutricional e autonomia</strong></div>
+      </div>
+      <p class="age-note">Resumo geral baseado na <a href="https://www.who.int/health-topics/complementary-feeding" target="_blank" rel="noopener noreferrer">orientação da OMS</a>. Deve ser adaptado à criança e às indicações dos profissionais que a acompanham.</p>
+    </section>
+    <section class="toolbar" aria-label="Pesquisar e filtrar">
+      <label>Pesquisar<input id="search" type="search" placeholder="Título ou palavra-chave…"></label>
+      <label>Tema<select id="specialty"><option value="">Todos os temas</option>{% for category in categories %}<option>{{ category }}</option>{% endfor %}</select></label>
+      <button id="favorites" aria-pressed="false">☆ Os meus favoritos</button>
+    </section>
+    <div class="results-heading"><h2>Biblioteca de alimentação complementar</h2><span id="count" aria-live="polite"></span></div>
+    <aside class="sponsored-card" aria-label="Conteúdo patrocinado demonstrativo">
+      <div><span class="sponsored-label">CONTEÚDO PATROCINADO · MARCA DEMONSTRATIVA</span><h2>Atualização em alimentação complementar</h2><p>Exemplo de uma campanha educativa dirigida a profissionais de pediatria. Não promove um produto real.</p></div>
+      <a href="/campaigns">Ver campanha e métricas agregadas</a>
+    </aside>
+    <p id="status" role="status"></p><button id="retry" hidden>Tentar novamente</button>
+    <section id="resources" class="grid" aria-label="Recursos"></section>
+    <footer>Catálogo de fontes públicas para consulta; não substitui avaliação individual, protocolos locais nem decisão clínica.</footer>
+  </main>
+  <dialog id="editor">
+    <form id="resource-form">
+      <div class="dialog-heading"><h2 id="form-title">Adicionar referência</h2><button type="button" id="close" aria-label="Fechar">×</button></div>
+      <input name="id" type="hidden">
+      <label>Título<input name="title" required maxlength="120"></label>
+      <label>Tema<select name="specialty" required>{% for category in categories %}<option>{{ category }}</option>{% endfor %}</select></label>
+      <label>Descrição<textarea name="description" required maxlength="1000" rows="4"></textarea></label>
+      <label>Ligação à fonte<input name="url" type="url" placeholder="https://…" required maxlength="2000"></label>
+      <p id="form-error" role="alert"></p><button class="primary" type="submit">Guardar referência</button>
+    </form>
+  </dialog>
+</body></html>

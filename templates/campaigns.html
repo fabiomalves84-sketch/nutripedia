@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="csrf-token" content="{{ csrf }}">
+  <meta name="description" content="Demonstração de gestão de campanhas para profissionais de saúde.">
+  <title>NutriPedia · Campanhas HCP</title>
+  <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='campaigns.css') }}">
+  <script src="{{ url_for('static', filename='campaigns.js') }}" defer></script>
+</head>
+<body>
+  <header><a class="brand" href="/"><span class="brand-mark" aria-hidden="true">N</span><span>NutriPedia</span></a><nav aria-label="Áreas"><a href="/">Área médica</a><a aria-current="page" href="/campaigns">Campanhas</a></nav></header>
+  <main>
+    <div class="campaign-heading"><div><p class="eyebrow">HCP ENGAGEMENT · DEMONSTRAÇÃO</p><h1>Campanhas para<br>profissionais de saúde.</h1><p class="intro">Planeia conteúdos patrocinados e acompanha resultados agregados.</p></div><button id="new-campaign" class="primary">+ Nova campanha</button></div>
+    <section class="metric-grid" aria-label="Resumo de desempenho">
+      <article><span>Alcance agregado</span><strong id="total-reach">—</strong></article>
+      <article><span>Taxa de abertura</span><strong id="open-rate">—</strong></article>
+      <article><span>Taxa de clique</span><strong id="click-rate">—</strong></article>
+    </section>
+    <div class="dashboard-title"><div><h2>Campanhas</h2><p>Dados fictícios para demonstração de portefólio.</p></div><span id="campaign-count" aria-live="polite"></span></div>
+    <p id="campaign-status" role="status"></p>
+    <section id="campaign-list" class="campaign-list" aria-label="Lista de campanhas"></section>
+    <footer>Todos os nomes, marcas e resultados apresentados são fictícios. O painel mostra apenas métricas agregadas e não contém dados pessoais de médicos ou pacientes.</footer>
+  </main>
+  <dialog id="campaign-editor">
+    <form id="campaign-form">
+      <div class="dialog-heading"><h2>Nova campanha</h2><button type="button" id="close-campaign" aria-label="Fechar">×</button></div>
+      <label>Nome da campanha<input name="name" required maxlength="120"></label>
+      <label>Patrocinador<input name="sponsor" required maxlength="120" placeholder="Marca demonstrativa"></label>
+      <label>Audiência<input name="audience" required maxlength="120" placeholder="Pediatria · Portugal"></label>
+      <label>Canal<select name="channel" required><option>Mensagem in-app</option><option>Email</option><option>Redes sociais</option></select></label>
+      <p id="campaign-error" role="alert"></p><button class="primary" type="submit">Guardar como rascunho</button>
+    </form>
+  </dialog>
+</body></html>
