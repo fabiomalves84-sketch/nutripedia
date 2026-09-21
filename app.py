@@ -11,6 +11,7 @@ from flask import Flask, abort, g, jsonify, render_template, request, session
 ROOT = Path(__file__).parent
 CATEGORIES = ['Começar aos 6 meses', 'Frequência e porções', 'Texturas', 'Variedade alimentar', 'Segurança', 'Alimentação responsiva', 'Vacinação']
 TRUSTED_SOURCE_DOMAINS = ('who.int', 'dgs.pt', 'efsa.europa.eu')
+SOURCE_VERIFIED_AT = '21 set. 2026'
 DEMO_RESOURCES = [
     ('Orientação completa dos 6 aos 23 meses', 'Começar aos 6 meses', 'Recomendações da OMS baseadas em evidência para crianças amamentadas e não amamentadas.', 'https://www.who.int/publications/i/item/9789240081864'),
     ('Quando começar a alimentação complementar', 'Começar aos 6 meses', 'Visão geral da OMS sobre o início aos 6 meses e a progressão da alimentação.', 'https://www.who.int/health-topics/complementary-feeding'),
@@ -56,6 +57,17 @@ def is_trusted_source(url):
     return (parsed.scheme == 'https' and not parsed.username and not parsed.password
             and any(hostname == domain or hostname.endswith(f'.{domain}')
                     for domain in TRUSTED_SOURCE_DOMAINS))
+
+
+def source_metadata(url):
+    """Apresenta a entidade e o idioma sem duplicar estes dados na base de dados."""
+    parsed = urlparse(url)
+    hostname = parsed.hostname or ''
+    if hostname == 'dgs.pt' or hostname.endswith('.dgs.pt'):
+        return {'source_name': 'DGS', 'source_language': 'Português'}
+    if hostname == 'efsa.europa.eu' or hostname.endswith('.efsa.europa.eu'):
+        return {'source_name': 'EFSA', 'source_language': 'Português' if '/pt/' in parsed.path else 'Inglês'}
+    return {'source_name': 'OMS', 'source_language': 'Inglês'}
 
 
 def create_app(database=None):
@@ -134,6 +146,9 @@ def create_app(database=None):
     @app.get('/api/resources')
     def resources():
         rows = [dict(row) for row in db().execute('SELECT * FROM resources ORDER BY title COLLATE NOCASE')]
+        for row in rows:
+            row.update(source_metadata(row['url']))
+            row['source_verified_at'] = SOURCE_VERIFIED_AT
         query = normalize(request.args.get('q', '').strip())
         specialty = request.args.get('specialty', '')
         return jsonify([r for r in rows if

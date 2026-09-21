@@ -28,6 +28,12 @@ class LibraryTests(unittest.TestCase):
         self.assertEqual(len(rows), 2)
         self.assertTrue(all('dgs.pt' in row['url'] for row in rows))
 
+    def test_resources_include_source_metadata(self):
+        rows = self.client.get('/api/resources?q=orientacao%20completa').json
+        self.assertEqual(rows[0]['source_name'], 'OMS')
+        self.assertEqual(rows[0]['source_language'], 'Inglês')
+        self.assertEqual(rows[0]['source_verified_at'], '21 set. 2026')
+
     def test_create_edit_and_persistence(self):
         response = self.client.post('/api/resources', json=self.resource, headers=self.headers)
         self.assertEqual(response.status_code, 201)

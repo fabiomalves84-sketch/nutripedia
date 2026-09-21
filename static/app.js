@@ -69,7 +69,8 @@ function resourceCard(resource) {
     finally { favorite.disabled = false; }
   };
   top.append(favorite);
-  card.append(top, element('h3', resource.title), element('p', resource.description, 'description'));
+  const metadata = element('p', `${resource.source_name} · ${resource.source_language} · Verificada em ${resource.source_verified_at}`, 'source-meta');
+  card.append(top, element('h3', resource.title), element('p', resource.description, 'description'), metadata);
   const bottom = element('div', '', 'card-bottom');
   const link = element('a', 'Consultar fonte ↗');
   link.href = resource.url;

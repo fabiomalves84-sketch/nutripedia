@@ -63,6 +63,7 @@ h2 { font-size: 1.15rem; margin: 0; }
 .star { border: none; padding: 0 8px; font-size: 1.6rem; background: transparent; color: var(--coral); }
 .card h3 { font-size: 1.15rem; line-height: 1.4; letter-spacing: -.025em; margin: 18px 0 8px; }
 .description { color: var(--muted); line-height: 1.6; font-size: .9375rem; margin: 0 0 24px; flex: 1; }
+.source-meta { color: #59707f; font-size: .75rem; line-height: 1.4; margin: -12px 0 16px; }
 .card-bottom { border-top: 1px solid #e6eef2; padding-top: 12px; }
 .card-bottom a { font-size: .875rem; color: var(--blue-dark); font-weight: 700; text-underline-offset: 4px; }
 .text-button { font-size: .875rem; border: none; padding: 8px; background: transparent; }
