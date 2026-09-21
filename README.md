@@ -1,6 +1,6 @@
 # NutriPedia
 
-Aplicação web de demonstração para organizar referências clínicas sobre alimentação complementar e simular campanhas dirigidas a profissionais de saúde.
+Aplicação web de demonstração para organizar referências clínicas sobre alimentação complementar e vacinação infantil, e simular campanhas dirigidas a profissionais de saúde.
 
 O projeto explora duas perspetivas do mesmo produto:
 
@@ -14,6 +14,7 @@ Todos os patrocinadores, campanhas e resultados apresentados são fictícios. A 
 ### Área médica
 
 - Guia interativo para as etapas 6–8, 9–11 e 12–23 meses.
+- Referências para o Programa Nacional de Vacinação, sempre ligadas à DGS e sem gerar calendários individuais.
 - Pesquisa sem distinguir maiúsculas ou acentos.
 - Filtros por tema e vista de favoritos.
 - Criação e edição de referências com validação no navegador e no servidor, apenas para fontes HTTPS da OMS, DGS ou EFSA.

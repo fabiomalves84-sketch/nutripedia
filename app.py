@@ -9,7 +9,7 @@ from urllib.parse import urlparse
 from flask import Flask, abort, g, jsonify, render_template, request, session
 
 ROOT = Path(__file__).parent
-CATEGORIES = ['Começar aos 6 meses', 'Frequência e porções', 'Texturas', 'Variedade alimentar', 'Segurança', 'Alimentação responsiva']
+CATEGORIES = ['Começar aos 6 meses', 'Frequência e porções', 'Texturas', 'Variedade alimentar', 'Segurança', 'Alimentação responsiva', 'Vacinação']
 TRUSTED_SOURCE_DOMAINS = ('who.int', 'dgs.pt', 'efsa.europa.eu')
 DEMO_RESOURCES = [
     ('Orientação completa dos 6 aos 23 meses', 'Começar aos 6 meses', 'Recomendações da OMS baseadas em evidência para crianças amamentadas e não amamentadas.', 'https://www.who.int/publications/i/item/9789240081864'),
@@ -20,6 +20,8 @@ DEMO_RESOURCES = [
     ('Introdução de alimentos potencialmente alergénicos', 'Segurança', 'Síntese da EFSA sobre a introdução de alimentos e alergénios na alimentação complementar.', 'https://www.efsa.europa.eu/en/glossary/complementary-feeding'),
     ('Alimentação adequada e segura', 'Segurança', 'Recomendações da OMS sobre adequação nutricional, higiene e preparação segura.', 'https://www.who.int/tools/elena/interventions/complementary-feeding'),
     ('Reconhecer fome e saciedade', 'Alimentação responsiva', 'Base de evidência da OMS sobre sinais da criança, pressão para comer e exposição repetida.', 'https://www.who.int/news-room/articles-detail/call-for-authors-systematic-reviews-on-feeding-of-infants-and-young-children-6-23-months-of-age-2set'),
+    ('Programa Nacional de Vacinação', 'Vacinação', 'Livro Azul da DGS: referencial técnico nacional para vacinação e outras estratégias de imunização em Portugal.', 'https://www.dgs.pt/paginas-de-sistema/saude-de-a-a-z/programa-nacional-de-vacinacao/livro-azul-da-imunizacao.aspx'),
+    ('Esquema geral recomendado do PNV', 'Vacinação', 'Consulta o esquema geral recomendado pela DGS. Confirma sempre o Boletim de Saúde Infantil e as indicações da equipa de saúde.', 'https://www.dgs.pt/paginas-de-sistema/saude-de-a-a-z/programa-nacional-de-vacinacao/livro-azul-da-imunizacao/parte-1-programa-nacional-de-vacinacao-2025.aspx'),
 ]
 OLD_DEMO_URLS = [
     'https://www.who.int/health-topics', 'https://www.dgs.pt/',
@@ -83,7 +85,7 @@ def create_app(database=None):
             reach INTEGER NOT NULL DEFAULT 0, opens INTEGER NOT NULL DEFAULT 0,
             clicks INTEGER NOT NULL DEFAULT 0)''')
         version = db().execute("SELECT value FROM app_meta WHERE key='demo_version'").fetchone()
-        if not version or version['value'] != '4':
+        if not version or version['value'] != '5':
             placeholders = ','.join('?' for _ in OLD_DEMO_URLS)
             db().execute(f'DELETE FROM resources WHERE url IN ({placeholders})', OLD_DEMO_URLS)
             db().execute('''UPDATE resources
@@ -93,7 +95,7 @@ def create_app(database=None):
                 db().execute('''INSERT INTO resources (title, specialty, description, url)
                                 SELECT ?, ?, ?, ? WHERE NOT EXISTS
                                 (SELECT 1 FROM resources WHERE url = ?)''', (*resource, resource[3]))
-            db().execute("INSERT INTO app_meta (key, value) VALUES ('demo_version', '4') ON CONFLICT(key) DO UPDATE SET value='4'")
+            db().execute("INSERT INTO app_meta (key, value) VALUES ('demo_version', '5') ON CONFLICT(key) DO UPDATE SET value='5'")
             db().commit()
         if not db().execute('SELECT COUNT(*) FROM campaigns').fetchone()[0]:
             db().executemany('''INSERT INTO campaigns

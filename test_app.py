@@ -23,6 +23,11 @@ class LibraryTests(unittest.TestCase):
         self.assertEqual(rows[0]['specialty'], 'Segurança')
         self.assertEqual(self.client.get('/api/resources?q=inexistente').json, [])
 
+    def test_includes_official_vaccination_references(self):
+        rows = self.client.get('/api/resources?specialty=Vacinação').json
+        self.assertEqual(len(rows), 2)
+        self.assertTrue(all('dgs.pt' in row['url'] for row in rows))
+
     def test_create_edit_and_persistence(self):
         response = self.client.post('/api/resources', json=self.resource, headers=self.headers)
         self.assertEqual(response.status_code, 201)
