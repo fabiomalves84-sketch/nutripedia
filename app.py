@@ -1,4 +1,5 @@
 """NutriPedia: biblioteca sobre alimentação complementar, para portefólio."""
+import logging
 import os
 import secrets
 import sqlite3
@@ -8,38 +9,12 @@ from urllib.parse import urlparse
 
 from flask import Flask, abort, g, jsonify, render_template, request, session
 
+from seed_data import CATEGORIES, DEMO_CAMPAIGNS, DEMO_RESOURCES, DEMO_VERSION, OLD_DEMO_URLS
+
 ROOT = Path(__file__).parent
-CATEGORIES = ['Começar aos 6 meses', 'Frequência e porções', 'Texturas', 'Variedade alimentar', 'Segurança', 'Alimentação responsiva', 'Vacinação']
 TRUSTED_SOURCE_DOMAINS = ('who.int', 'dgs.pt', 'efsa.europa.eu')
 SOURCE_VERIFIED_AT = '21 set. 2026'
-DEMO_RESOURCES = [
-    ('Orientação completa dos 6 aos 23 meses', 'Começar aos 6 meses', 'Recomendações da OMS baseadas em evidência para crianças amamentadas e não amamentadas.', 'https://www.who.int/publications/i/item/9789240081864'),
-    ('Quando começar a alimentação complementar', 'Começar aos 6 meses', 'Visão geral da OMS sobre o início aos 6 meses e a progressão da alimentação.', 'https://www.who.int/health-topics/complementary-feeding'),
-    ('Frequência mínima das refeições', 'Frequência e porções', 'Indicador e princípios da OMS para o número de refeições entre os 6 e os 23 meses.', 'https://www.who.int/data/gho/data/indicators/indicator-details/GHO/minimum-meal-frequency-6-23-months'),
-    ('Alimentação saudável dos 0 aos 6 anos', 'Variedade alimentar', 'Manual português da DGS para profissionais e educadores, com orientações por idade.', 'https://alimentacaosaudavel.dgs.pt/alimentacao-saudavel-dos-0-aos-6-anos/'),
-    ('Texturas e progressão dos alimentos', 'Texturas', 'Resumo da OMS sobre consistência, variedade e alimentos que a criança pode segurar.', 'https://www.who.int/news-room/fact-sheets/detail/infant-and-young-child-feeding'),
-    ('Introdução de alimentos potencialmente alergénicos', 'Segurança', 'Página da EFSA, em português, sobre a introdução de alimentos e alergénios na alimentação complementar.', 'https://www.efsa.europa.eu/pt/glossary/complementary-feeding'),
-    ('Alimentação adequada e segura', 'Segurança', 'Orientação da OMS sobre higiene, preparação e armazenamento seguro de alimentos complementares.', 'https://www.who.int/publications/i/item/924154614X'),
-    ('Reconhecer fome e saciedade', 'Alimentação responsiva', 'Base de evidência da OMS sobre sinais da criança, pressão para comer e exposição repetida.', 'https://www.who.int/news-room/articles-detail/call-for-authors-systematic-reviews-on-feeding-of-infants-and-young-children-6-23-months-of-age-2set'),
-    ('Programa Nacional de Vacinação', 'Vacinação', 'Livro Azul da DGS: referencial técnico nacional para vacinação e outras estratégias de imunização em Portugal.', 'https://www.dgs.pt/paginas-de-sistema/saude-de-a-a-z/programa-nacional-de-vacinacao/livro-azul-da-imunizacao.aspx'),
-    ('Esquema geral recomendado do PNV', 'Vacinação', 'Consulta o esquema geral recomendado pela DGS. Confirma sempre o Boletim de Saúde Infantil e as indicações da equipa de saúde.', 'https://www.dgs.pt/paginas-de-sistema/saude-de-a-a-z/programa-nacional-de-vacinacao/livro-azul-da-imunizacao/parte-1-programa-nacional-de-vacinacao-2025.aspx'),
-]
-OLD_DEMO_URLS = [
-    'https://www.who.int/health-topics', 'https://www.dgs.pt/',
-    'https://www.who.int/health-topics/cardiovascular-diseases',
-    'https://www.who.int/health-topics/child-health',
-    'https://www.who.int/health-topics/mental-health',
-    'https://www.who.int/health-topics/patient-safety',
-    'https://www.dgs.pt/pns-e-programas/programas-de-saude/saude-infantil-e-juvenil.aspx',
-    'https://www.who.int/tools/child-growth-standards/standards',
-    'https://www.who.int/news-room/questions-and-answers/item/child-growth-standards',
-    'https://www.dgs.pt/paginas-de-sistema/saude-de-a-a-z/programa-nacional-de-vacinacao/livro-azul-da-imunizacao.aspx',
-    'https://www.who.int/publications/i/item/9789241510219',
-    'https://www.who.int/news-room/fact-sheets/detail/adolescent-mental-health',
-    'https://www.who.int/health-topics/early-child-development',
-    'https://www.who.int/tools/elena/interventions/complementary-feeding',
-    'https://www.efsa.europa.eu/en/glossary/complementary-feeding',
-]
+logger = logging.getLogger(__name__)
 
 
 def normalize(value):
@@ -72,7 +47,13 @@ def source_metadata(url):
 
 def create_app(database=None):
     app = Flask(__name__)
-    app.config.update(SECRET_KEY=os.environ.get('SECRET_KEY') or secrets.token_hex(32),
+    secret_key = os.environ.get('SECRET_KEY')
+    if not secret_key:
+        logger.warning('SECRET_KEY não definida: a gerar uma chave temporária válida apenas '
+                        'para este processo. As sessões e os tokens CSRF existentes ficam '
+                        'inválidos a cada reinício. Define SECRET_KEY em produção (ver .env.example).')
+        secret_key = secrets.token_hex(32)
+    app.config.update(SECRET_KEY=secret_key,
                       DATABASE=str(database or ROOT / 'library.sqlite'),
                       MAX_CONTENT_LENGTH=16384, SESSION_COOKIE_SAMESITE='Strict')
 
@@ -99,7 +80,7 @@ def create_app(database=None):
             reach INTEGER NOT NULL DEFAULT 0, opens INTEGER NOT NULL DEFAULT 0,
             clicks INTEGER NOT NULL DEFAULT 0)''')
         version = db().execute("SELECT value FROM app_meta WHERE key='demo_version'").fetchone()
-        if not version or version['value'] != '7':
+        if not version or version['value'] != DEMO_VERSION:
             placeholders = ','.join('?' for _ in OLD_DEMO_URLS)
             db().execute(f'DELETE FROM resources WHERE url IN ({placeholders})', OLD_DEMO_URLS)
             db().execute('''UPDATE resources
@@ -109,15 +90,13 @@ def create_app(database=None):
                 db().execute('''INSERT INTO resources (title, specialty, description, url)
                                 SELECT ?, ?, ?, ? WHERE NOT EXISTS
                                 (SELECT 1 FROM resources WHERE url = ?)''', (*resource, resource[3]))
-            db().execute("INSERT INTO app_meta (key, value) VALUES ('demo_version', '7') ON CONFLICT(key) DO UPDATE SET value='7'")
+            db().execute("INSERT INTO app_meta (key, value) VALUES ('demo_version', ?) ON CONFLICT(key) DO UPDATE SET value=?",
+                         (DEMO_VERSION, DEMO_VERSION))
             db().commit()
         if not db().execute('SELECT COUNT(*) FROM campaigns').fetchone()[0]:
             db().executemany('''INSERT INTO campaigns
                 (name, sponsor, audience, channel, status, reach, opens, clicks)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)''', [
-                ('Alimentação complementar 6–23 meses', 'Marca demonstrativa', 'Pediatria · Portugal', 'Mensagem in-app', 'active', 8420, 5110, 1480),
-                ('Atualização científica em nutrição infantil', 'Parceiro demonstrativo', 'Pediatria · Portugal', 'Email', 'draft', 0, 0, 0),
-            ])
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)''', DEMO_CAMPAIGNS)
             db().commit()
 
     @app.before_request
