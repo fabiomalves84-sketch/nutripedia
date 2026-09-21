@@ -17,7 +17,7 @@ DEMO_RESOURCES = [
     ('Frequência mínima das refeições', 'Frequência e porções', 'Indicador e princípios da OMS para o número de refeições entre os 6 e os 23 meses.', 'https://www.who.int/data/gho/data/indicators/indicator-details/GHO/minimum-meal-frequency-6-23-months'),
     ('Alimentação saudável dos 0 aos 6 anos', 'Variedade alimentar', 'Manual português da DGS para profissionais e educadores, com orientações por idade.', 'https://alimentacaosaudavel.dgs.pt/alimentacao-saudavel-dos-0-aos-6-anos/'),
     ('Texturas e progressão dos alimentos', 'Texturas', 'Resumo da OMS sobre consistência, variedade e alimentos que a criança pode segurar.', 'https://www.who.int/news-room/fact-sheets/detail/infant-and-young-child-feeding'),
-    ('Introdução de alimentos potencialmente alergénicos', 'Segurança', 'Síntese da EFSA sobre a introdução de alimentos e alergénios na alimentação complementar.', 'https://www.efsa.europa.eu/en/glossary/complementary-feeding'),
+    ('Introdução de alimentos potencialmente alergénicos', 'Segurança', 'Página da EFSA, em português, sobre a introdução de alimentos e alergénios na alimentação complementar.', 'https://www.efsa.europa.eu/pt/glossary/complementary-feeding'),
     ('Alimentação adequada e segura', 'Segurança', 'Orientação da OMS sobre higiene, preparação e armazenamento seguro de alimentos complementares.', 'https://www.who.int/publications/i/item/924154614X'),
     ('Reconhecer fome e saciedade', 'Alimentação responsiva', 'Base de evidência da OMS sobre sinais da criança, pressão para comer e exposição repetida.', 'https://www.who.int/news-room/articles-detail/call-for-authors-systematic-reviews-on-feeding-of-infants-and-young-children-6-23-months-of-age-2set'),
     ('Programa Nacional de Vacinação', 'Vacinação', 'Livro Azul da DGS: referencial técnico nacional para vacinação e outras estratégias de imunização em Portugal.', 'https://www.dgs.pt/paginas-de-sistema/saude-de-a-a-z/programa-nacional-de-vacinacao/livro-azul-da-imunizacao.aspx'),
@@ -37,6 +37,7 @@ OLD_DEMO_URLS = [
     'https://www.who.int/news-room/fact-sheets/detail/adolescent-mental-health',
     'https://www.who.int/health-topics/early-child-development',
     'https://www.who.int/tools/elena/interventions/complementary-feeding',
+    'https://www.efsa.europa.eu/en/glossary/complementary-feeding',
 ]
 
 
@@ -86,7 +87,7 @@ def create_app(database=None):
             reach INTEGER NOT NULL DEFAULT 0, opens INTEGER NOT NULL DEFAULT 0,
             clicks INTEGER NOT NULL DEFAULT 0)''')
         version = db().execute("SELECT value FROM app_meta WHERE key='demo_version'").fetchone()
-        if not version or version['value'] != '6':
+        if not version or version['value'] != '7':
             placeholders = ','.join('?' for _ in OLD_DEMO_URLS)
             db().execute(f'DELETE FROM resources WHERE url IN ({placeholders})', OLD_DEMO_URLS)
             db().execute('''UPDATE resources
@@ -96,7 +97,7 @@ def create_app(database=None):
                 db().execute('''INSERT INTO resources (title, specialty, description, url)
                                 SELECT ?, ?, ?, ? WHERE NOT EXISTS
                                 (SELECT 1 FROM resources WHERE url = ?)''', (*resource, resource[3]))
-            db().execute("INSERT INTO app_meta (key, value) VALUES ('demo_version', '6') ON CONFLICT(key) DO UPDATE SET value='6'")
+            db().execute("INSERT INTO app_meta (key, value) VALUES ('demo_version', '7') ON CONFLICT(key) DO UPDATE SET value='7'")
             db().commit()
         if not db().execute('SELECT COUNT(*) FROM campaigns').fetchone()[0]:
             db().executemany('''INSERT INTO campaigns
