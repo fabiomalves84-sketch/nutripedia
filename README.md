@@ -50,7 +50,7 @@ flowchart LR
 Requer Python 3.10 ou superior.
 
 ```sh
-git clone URL_DO_REPOSITORIO
+git clone https://github.com/fabiomalves84-sketch/nutripedia.git
 cd nutripedia
 python3 -m venv .venv
 source .venv/bin/activate
