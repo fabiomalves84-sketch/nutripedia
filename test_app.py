@@ -78,6 +78,17 @@ class LibraryTests(unittest.TestCase):
         self.assertEqual(self.client.patch('/api/campaigns/1/status',
                          json={'status': 'invalid'}, headers=self.headers).status_code, 400)
 
+    def test_api_errors_are_json_while_page_errors_stay_html(self):
+        missing = self.client.get('/api/nao-existe')
+        self.assertEqual(missing.status_code, 404)
+        self.assertEqual(missing.json, {'error': 'Recurso não encontrado.'})
+        wrong_method = self.client.get('/api/campaigns/1/status')
+        self.assertEqual(wrong_method.status_code, 405)
+        self.assertEqual(wrong_method.json, {'error': 'Método não permitido.'})
+        page_missing = self.client.get('/pagina-que-nao-existe')
+        self.assertEqual(page_missing.status_code, 404)
+        self.assertEqual(page_missing.content_type, 'text/html; charset=utf-8')
+
 
 if __name__ == '__main__':
     unittest.main()

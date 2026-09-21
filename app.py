@@ -8,8 +8,12 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from flask import Flask, abort, g, jsonify, render_template, request, session
+from werkzeug.exceptions import HTTPException
 
 from seed_data import CATEGORIES, DEMO_CAMPAIGNS, DEMO_RESOURCES, DEMO_VERSION, OLD_DEMO_URLS
+
+API_ERROR_MESSAGES = {403: 'Pedido não autorizado.', 404: 'Recurso não encontrado.',
+                      405: 'Método não permitido.'}
 
 ROOT = Path(__file__).parent
 TRUSTED_SOURCE_DOMAINS = ('who.int', 'dgs.pt', 'efsa.europa.eu')
@@ -111,6 +115,13 @@ def create_app(database=None):
         response.headers['X-Content-Type-Options'] = 'nosniff'
         response.headers['Content-Security-Policy'] = "default-src 'self'; style-src 'self'; script-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
         return response
+
+    @app.errorhandler(HTTPException)
+    def handle_api_error(error):
+        if not request.path.startswith('/api/'):
+            return error
+        message = API_ERROR_MESSAGES.get(error.code, 'Não foi possível concluir o pedido.')
+        return jsonify(error=message), error.code
 
     @app.get('/')
     def index():

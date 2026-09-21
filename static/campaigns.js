@@ -1,37 +1,22 @@
-const $ = (selector) => document.querySelector(selector);
+import { $, api, element } from './common.js';
+
 const editor = $('#campaign-editor');
 const form = $('#campaign-form');
-
-async function api(path, options = {}) {
-  const response = await fetch(path, { ...options, headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': $('meta[name="csrf-token"]').content } });
-  if (!response.ok) {
-    const data = await response.json().catch(() => ({}));
-    throw new Error(data.error || 'Não foi possível concluir. Tenta novamente.');
-  }
-  return response.json();
-}
-
-function node(tag, text, className) {
-  const item = document.createElement(tag);
-  item.textContent = text;
-  if (className) item.className = className;
-  return item;
-}
 
 function percent(part, total) { return total ? `${Math.round(part / total * 100)}%` : '—'; }
 function statusLabel(status) { return { active: 'Ativa', paused: 'Em pausa', draft: 'Rascunho' }[status]; }
 
 function campaignCard(campaign) {
-  const card = node('article', '', 'campaign-card');
-  const top = node('div', '', 'campaign-card-top');
-  top.append(node('span', statusLabel(campaign.status), `campaign-state ${campaign.status}`), node('span', campaign.channel, 'campaign-channel'));
-  card.append(top, node('h3', campaign.name), node('p', `${campaign.sponsor} · ${campaign.audience}`, 'campaign-meta'));
-  const metrics = node('div', '', 'campaign-metrics');
+  const card = element('article', '', 'campaign-card');
+  const top = element('div', '', 'campaign-card-top');
+  top.append(element('span', statusLabel(campaign.status), `campaign-state ${campaign.status}`), element('span', campaign.channel, 'campaign-channel'));
+  card.append(top, element('h3', campaign.name), element('p', `${campaign.sponsor} · ${campaign.audience}`, 'campaign-meta'));
+  const metrics = element('div', '', 'campaign-metrics');
   for (const [label, value] of [['Alcance', campaign.reach.toLocaleString('pt-PT')], ['Aberturas', percent(campaign.opens, campaign.reach)], ['Cliques', percent(campaign.clicks, campaign.reach)]]) {
-    const metric = node('div'); metric.append(node('span', label), node('strong', value)); metrics.append(metric);
+    const metric = element('div'); metric.append(element('span', label), element('strong', value)); metrics.append(metric);
   }
   card.append(metrics);
-  const actions = node('div', '', 'campaign-actions');
+  const actions = element('div', '', 'campaign-actions');
   const select = document.createElement('select');
   select.setAttribute('aria-label', `Estado da campanha ${campaign.name}`);
   for (const [value, label] of [['draft', 'Rascunho'], ['active', 'Ativa'], ['paused', 'Em pausa']]) {
@@ -43,7 +28,7 @@ function campaignCard(campaign) {
     catch (error) { $('#campaign-status').textContent = error.message; }
     finally { select.disabled = false; }
   };
-  actions.append(node('label', 'Alterar estado'), select); card.append(actions);
+  actions.append(element('label', 'Alterar estado'), select); card.append(actions);
   return card;
 }
 

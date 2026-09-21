@@ -1,4 +1,5 @@
-const $ = (selector) => document.querySelector(selector);
+import { $, api, element, debounce } from './common.js';
+
 const form = $('#resource-form');
 const dialog = $('#editor');
 let favoritesOnly = false;
@@ -23,25 +24,6 @@ for (const [index, tab] of ageTabs.entries()) {
     selectAge(next);
     next.focus();
   });
-}
-
-async function api(path, options = {}) {
-  const response = await fetch(path, {
-    ...options,
-    headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': $('meta[name="csrf-token"]').content },
-  });
-  if (!response.ok) {
-    const data = await response.json().catch(() => ({}));
-    throw new Error(data.error || 'Não foi possível concluir. Atualiza a página ou tenta novamente.');
-  }
-  return response.json();
-}
-
-function element(tag, text, className) {
-  const node = document.createElement(tag);
-  node.textContent = text;
-  if (className) node.className = className;
-  return node;
 }
 
 function openEditor(resource = {}) {
@@ -112,7 +94,7 @@ async function loadResources() {
 $('#add').onclick = () => openEditor();
 $('#close').onclick = () => dialog.close();
 $('#retry').onclick = loadResources;
-$('#search').addEventListener('input', loadResources);
+$('#search').addEventListener('input', debounce(loadResources, 200));
 $('#specialty').addEventListener('change', loadResources);
 $('#favorites').onclick = () => {
   favoritesOnly = !favoritesOnly;
