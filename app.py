@@ -10,6 +10,7 @@ from flask import Flask, abort, g, jsonify, render_template, request, session
 
 ROOT = Path(__file__).parent
 CATEGORIES = ['Começar aos 6 meses', 'Frequência e porções', 'Texturas', 'Variedade alimentar', 'Segurança', 'Alimentação responsiva']
+TRUSTED_SOURCE_DOMAINS = ('who.int', 'dgs.pt', 'efsa.europa.eu')
 DEMO_RESOURCES = [
     ('Orientação completa dos 6 aos 23 meses', 'Começar aos 6 meses', 'Recomendações da OMS baseadas em evidência para crianças amamentadas e não amamentadas.', 'https://www.who.int/publications/i/item/9789240081864'),
     ('Quando começar a alimentação complementar', 'Começar aos 6 meses', 'Visão geral da OMS sobre o início aos 6 meses e a progressão da alimentação.', 'https://www.who.int/health-topics/complementary-feeding'),
@@ -39,6 +40,18 @@ OLD_DEMO_URLS = [
 def normalize(value):
     return ''.join(c for c in unicodedata.normalize('NFD', value.casefold())
                    if unicodedata.category(c) != 'Mn')
+
+
+def is_trusted_source(url):
+    """Aceita apenas fontes HTTPS de entidades de saúde autorizadas."""
+    try:
+        parsed = urlparse(url)
+        hostname = parsed.hostname or ''
+    except ValueError:
+        return False
+    return (parsed.scheme == 'https' and not parsed.username and not parsed.password
+            and any(hostname == domain or hostname.endswith(f'.{domain}')
+                    for domain in TRUSTED_SOURCE_DOMAINS))
 
 
 def create_app(database=None):
@@ -136,13 +149,8 @@ def create_app(database=None):
             if not isinstance(value, str) or not value.strip() or len(value.strip()) > maximum:
                 return jsonify(error=f'O campo {key} é obrigatório e aceita até {maximum} caracteres.'), 400
             fields[key] = value.strip()
-        try:
-            url = urlparse(fields['url'])
-            valid_url = url.scheme in {'https', 'http'} and bool(url.hostname) and not url.username and not url.password
-        except ValueError:
-            valid_url = False
-        if not valid_url or fields['specialty'] not in CATEGORIES:
-            return jsonify(error='Verifica a ligação e o tema.'), 400
+        if not is_trusted_source(fields['url']) or fields['specialty'] not in CATEGORIES:
+            return jsonify(error='Seleciona uma ligação HTTPS da OMS, DGS ou EFSA e um tema válido.'), 400
         values = tuple(fields[key] for key in ('title', 'specialty', 'description', 'url'))
         if resource_id is None:
             cursor = db().execute('INSERT INTO resources (title, specialty, description, url) VALUES (?, ?, ?, ?)', values)

@@ -60,7 +60,8 @@
       <label>Título<input name="title" required maxlength="120"></label>
       <label>Tema<select name="specialty" required>{% for category in categories %}<option>{{ category }}</option>{% endfor %}</select></label>
       <label>Descrição<textarea name="description" required maxlength="1000" rows="4"></textarea></label>
-      <label>Ligação à fonte<input name="url" type="url" placeholder="https://…" required maxlength="2000"></label>
+      <label>Ligação à fonte<input name="url" type="url" placeholder="https://…" required maxlength="2000" aria-describedby="source-help"></label>
+      <small id="source-help">São aceites apenas fontes HTTPS da OMS, DGS ou EFSA.</small>
       <p id="form-error" role="alert"></p><button class="primary" type="submit">Guardar referência</button>
     </form>
   </dialog>

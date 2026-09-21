@@ -16,7 +16,7 @@ Todos os patrocinadores, campanhas e resultados apresentados são fictícios. A 
 - Guia interativo para as etapas 6–8, 9–11 e 12–23 meses.
 - Pesquisa sem distinguir maiúsculas ou acentos.
 - Filtros por tema e vista de favoritos.
-- Criação e edição de referências com validação no navegador e no servidor.
+- Criação e edição de referências com validação no navegador e no servidor, apenas para fontes HTTPS da OMS, DGS ou EFSA.
 - Persistência local em SQLite.
 - Conteúdo patrocinado claramente identificado e separado das referências clínicas.
 
@@ -112,6 +112,7 @@ nutripedia/
 - **SQLite** mantém a demonstração simples e reproduzível, sem um servidor de base de dados externo.
 - **SQL parametrizado** separa os valores das instruções e reduz o risco de injeção SQL.
 - **Validação no servidor** protege a API mesmo quando a validação do formulário é contornada.
+- **Lista de domínios de confiança** impede a introdução de fontes não verificadas na biblioteca.
 - **Proteção CSRF** é obrigatória nos pedidos que alteram dados.
 - **`textContent` no JavaScript** evita inserir conteúdo recebido como HTML.
 - **Métricas agregadas** demonstram análise de campanhas sem perfis individuais.

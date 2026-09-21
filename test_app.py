@@ -38,8 +38,10 @@ class LibraryTests(unittest.TestCase):
             self.assertEqual(self.client.patch(path, json={'favorite': value}, headers=self.headers).status_code, 200)
             self.assertEqual(len(self.client.get('/api/resources?favorites=1').json), int(value))
 
-    def test_rejects_invalid_data_and_unsafe_links(self):
-        for changes in ({'title': ' '}, {'url': 'javascript:alert(1)'}, {'specialty': 'Inexistente'}, {'description': 42}):
+    def test_rejects_invalid_data_and_untrusted_links(self):
+        for changes in ({'title': ' '}, {'url': 'javascript:alert(1)'},
+                        {'url': 'https://example.com/article'},
+                        {'specialty': 'Inexistente'}, {'description': 42}):
             self.assertEqual(self.client.post('/api/resources', json=dict(self.resource, **changes), headers=self.headers).status_code, 400)
 
     def test_protects_writes_and_missing_resources(self):
